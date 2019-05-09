@@ -17,3 +17,13 @@ User & Server
  Commands:
 
     login <user> <password>
+    logoff
+
+    msg <user> body...
+    guest: "msg jim Hello World" <-- sent
+    jim: "msg guest Hello World" <-- received
+
+
+    #topic <-- chatroom / group chat
+    join #topic
+    msg #topic body...
