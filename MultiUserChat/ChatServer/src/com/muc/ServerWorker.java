@@ -157,6 +157,7 @@ public class ServerWorker extends Thread{
             } else {
                 String msg = "error login\n";
                 outputStream.write(msg.getBytes());
+                System.err.println("Login failed for " + login);
             }
         }
     }
