@@ -1,4 +1,6 @@
-
+/**
+ * @author Gabe W.
+ */
 package com.muc;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +24,9 @@ public class ServerWorker<topic> extends Thread{
         this.server = server;
     }
 
+    /**
+     * run() will try to call handleClientSocket or throw an exception if not possible
+     */
     @Override
     public void run() {
         Thread t = new Thread() {
@@ -38,6 +43,13 @@ public class ServerWorker<topic> extends Thread{
         t.start();
     }
 
+
+    /**
+     * handleClientSocket takes the clientSocket variable from run()
+     * @param clientSocket
+     * @throws InterruptedException
+     * @throws IOException
+     */
     private void handleClientSocket(Socket clientSocket) throws InterruptedException, IOException {
         InputStream inputStream = clientSocket.getInputStream();
         this.outputStream = clientSocket.getOutputStream();
@@ -69,17 +81,43 @@ public class ServerWorker<topic> extends Thread{
         clientSocket.close();
     }
 
+    /**
+     *This removes a topic
+     * @param tokens
+     */
     private void handleLeave(String[] tokens) {
+        if (tokens.length > 1) {
+            String topic = tokens[1];
+            topicSet.remove(topic);
+        }
     }
 
+    /**
+     * This confirms that the topic is actually in the topicSet
+     * @param topic
+     * @return
+     */
     public boolean isMemberOfTopic(String topic) {
         return topicSet.contains(topic);
     }
 
+    /**
+     * This creates a new topic
+     * @param tokens
+     */
     private void handleJoin(String[] tokens) {
+        if (tokens.length > 1) {
+            String topic = tokens[1];
+            topicSet.add(topic);
+        }
 
     }
 
+    /**
+     * This will send the message to either the desired topic group or individual user
+     * @param tokens
+     * @throws IOException
+     */
     private void handleMessage(String[] tokens) throws IOException {
         String sendTo = tokens[1];
         String body = "";
@@ -107,6 +145,10 @@ public class ServerWorker<topic> extends Thread{
 
     }
 
+    /**
+     * This will close the connection if a user logs off
+     * @throws IOException
+     */
     private void handleLogOff() throws IOException {
         server.removeWorker(this);
         List<ServerWorker> workerList = server.getWorkerList();
@@ -120,16 +162,26 @@ public class ServerWorker<topic> extends Thread{
         clientSocket.close();
     }
 
+    /**
+     * This is just a getter
+     * @return
+     */
     public String getLogin() {
         return login;
     }
 
+    /**
+     * handleLogin will let guest or jim login, and then sen the appropriate message or error message
+     * @param outputStream
+     * @param tokens
+     * @throws IOException
+     */
     private void handleLogin(OutputStream outputStream, String[] tokens) throws IOException {
         if (tokens.length == 3) {
             String login = tokens[1];
             String password = tokens[2];
 
-            if ((login.equals("guest") && password.equals("guest")) || (login.equals("jim") && password.equals("jim")) || (login.equals("juan") && password.equals("juan"))) {
+            if ((login.equals("guest") && password.equals("guest")) || (login.equals("jim") && password.equals("jim"))) {
                 String msg = "ok login\n";
                 outputStream.write(msg.getBytes());
                 this.login = login;
@@ -151,7 +203,7 @@ public class ServerWorker<topic> extends Thread{
                     }
                 }
 
-            } else if (List.of("guest", "jim", "juan").contains(login)) {
+            } else if (List.of("guest", "jim").contains(login)) {
                 String msg = "wrong password\n";
                 outputStream.write(msg.getBytes());
             } else {
@@ -162,6 +214,11 @@ public class ServerWorker<topic> extends Thread{
         }
     }
 
+    /**
+     * send with use outputStream to actually display the message
+     * @param onlineMsg
+     * @throws IOException
+     */
     private void send(String onlineMsg) throws IOException {
         outputStream.write(onlineMsg.getBytes());
     }
